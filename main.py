@@ -12,7 +12,7 @@ dp = aiogram.Dispatcher(bot=bot)
 
 donate = hlink("🎉🍩 Поддержите проект!!! 🧸🎀", "https://yoomoney.ru/to/41001248982205/500")
 
-logging.basicConfig(level=logging.INFO, filename="bot_log.log", filemode="w")
+logging.basicConfig(level=logging.INFO, filename="bot_log.log", filemode="a")
 logging.debug("A DEBUG Message")
 logging.info("An INFO")
 logging.warning("A WARNING")
