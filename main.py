@@ -23,10 +23,9 @@ logging.critical("A message of CRITICAL severity")
 # Хэндлер на команду /start
 @dp.message_handler(commands=['start'])
 async def start_handler(message: aiogram.types.Message):
-    user_id = message.from_user.id
-    user_full_name = message.from_user.full_name
-    logging.info(f'{user_id=} {user_full_name=} {time.asctime()}')
-    await message.reply(f"привет, {user_full_name}")
+    logging.info(f'{message.text=} {message.from_user.id=} {message.from_user.is_bot=} {message.from_user.full_name=}'
+                 f' {message.from_user.username=} {message.from_user.language_code=} {time.asctime()}')
+    await message.reply(f"привет, {message.from_user.full_name}")
     time.sleep(1)
     keyboard = aiogram.types.ReplyKeyboardMarkup(resize_keyboard=True)
     buttons = ["☀️Узнать погоду 🌤", "🎵Скачать музыку🎧"]
@@ -40,22 +39,26 @@ async def start_handler(message: aiogram.types.Message):
 async def weather(message: aiogram.types.Message):
     await message.answer("Напишите название города или GPS-координаты, в конце добавте <b>+0</b>. Можно уточнить страну через запятую, "
                          "например: <b>\"Москва, Россия +0\"</b>")
-    logging.info(f'{message.text=} {message.from_user.full_name=} {time.asctime()}')
+    logging.info(f'{message.text=} {message.from_user.id=} {message.from_user.is_bot=} {message.from_user.full_name=}'
+                 f' {message.from_user.username=} {message.from_user.language_code=} {time.asctime()}')
 
 
 @dp.message_handler(Text(equals="🎵Скачать музыку🎧"))
-async def weather(message: aiogram.types.Message):
+async def music_select(message: aiogram.types.Message):
     await message.answer("Что хотите послушать? Пишите как в поиске youtube, в конце добавьте <b>+5</b>")
-    logging.info(f'{message.text=} {message.from_user.full_name=} {time.asctime()}')
+    logging.info(f'{message.text=} {message.from_user.id=} {message.from_user.is_bot=} {message.from_user.full_name=}'
+                 f' {message.from_user.username=} {message.from_user.language_code=} {time.asctime()}')
 
 
 @dp.message_handler(Text)
-async def weather(message: aiogram.types.Message):
+async def worker(message: aiogram.types.Message):
 
     if message.text[-2:] == "+5":
         logging.info(f'{message.text[:-2]=} {message.from_user.full_name=} {time.asctime()}')
         try:
             await message.answer("🤖 Пару сек. Ищу трек.")
+            await message.answer("🤖 Некоторые треки получаются очень большими. Их я пока не могу загрузить. Если "
+                                 "ожидание затянулось больше минуты, то напиши название иначе или другой трек")
             ytb = yd()
             youtube_id = ytb.get_videoId(message.text[:-2])  # Для вывода дополнительной ссылки на Youtube
             dw_link = ytb.get_dwnld_link(youtube_id)
