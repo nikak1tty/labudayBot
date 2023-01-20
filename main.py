@@ -63,26 +63,35 @@ async def worker(message: aiogram.types.Message):
                                  "ожидание затянулось больше 5 минут, то напиши название иначе или другой трек")
             ytb = yd()
             youtube_id = ytb.get_videoId(message.text[:-2])  # Для вывода дополнительной ссылки на Youtube
+            logging.info(f'{message.text[:-2]=} {youtube_id} {message.from_user.full_name=} {time.asctime()}')
             dw_link = ytb.get_dwnld_link(youtube_id)
-            r = requests.get(dw_link[0])
-            await message.answer("Загружаю трек 🎼 <b>" + dw_link[1] + ".mp3</b>")
-            logging.debug(f'{message.text=} {r=} {time.asctime()}')
-            await message.answer_audio(r.content, title=dw_link[1] + ".mp3", performer="@labudayBot",
-                                       caption="@labudayBot - музыка с Ютуба")
-            await message.answer("Приятного прослушивания! 🪗")
-            await message.answer(donate, disable_web_page_preview=True)
-            await message.answer("/start")
+            logging.info(f'{message.text[:-2]=} {dw_link} {message.from_user.full_name=} {time.asctime()}')
+            size = float(dw_link[2].split()[0]) # str "554.92 MB"
+
+            if size >= 50.0:
+                await message.answer(f""
+                    f"🤖 Кароче нашел. Но файл очень большой <b>{dw_link[2]}</b>. В настоящее время боты могут отправлять аудиофайлы "
+                    f"размером до 50 МБ, это ограничение может быть изменено в будущем... "
+                    f"Попробуй уточнить запрос.")
+            else:
+                r = requests.get(dw_link[0])
+                await message.answer("Загружаю трек 🎼 <b>" + dw_link[1] + ".mp3</b>")
+                await message.answer(f"Размер трека <b>{dw_link[2]}</b>")
+                logging.debug(f'{message.text=} {r=} {time.asctime()}')
+                await message.answer_audio(r.content, title=dw_link[1] + ".mp3", performer="@labudayBot",
+                                           caption="@labudayBot - музыка с Ютуба")
+                await message.answer("Приятного прослушивания! 🪗")
+                await message.answer(donate, disable_web_page_preview=True)
+                await message.answer("/start")
 
         except requests.exceptions.MissingSchema:
             logging.exception(message)
             await message.answer("🤖 Кароче не нашел. Может такого нет, а может это стрим онлайн. Попробуй уточнить "
                                  "запрос.")
-        except aiogram.exceptions.NetworkError('File too large for uploading.') as NetErr:
+        except aiogram.exceptions.NetworkError() as NetErr:
             logging.exception(message)
-            if NetErr == "File too large for uploading.":
-                await message.answer(
-                    f"🤖 Кароче нашел. Но файл очень большой, а в Телеграм есть ограничения на размер файлов. "
-                    f"Попробуй уточнить запрос. Или скачать по сcылке {dw_link[0]}")
+            await message.answer(
+                    f"🤖 Какая-то проблемма с Телеграм. Не получается скачать трек")
 
         except Exception:
             logging.exception(message)
