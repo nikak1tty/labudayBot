@@ -36,15 +36,21 @@ class YoutubeMp3Downloader:
         """
         Принимает строку идентификатор видео с ютуба. Возвращает ссылку на скачивание.
         :param videoId: string like that eLa685J5uA8  from https://www.youtube.com/watch?v=eLa685J5uA8
-        :return: string. Download link like that https://newconverter.online/download/eLa685J5uA8/mp3/128/1674116870/2c3b745627dcb269f9328ce998fd67ac18698967f4bcdf9e2e0e1387e9aac6f7/0
+        :return: tuple (link: string, track_name: string, file_size ). Download link like that https://newconverter.online/download/eLa685J5uA8/mp3/128/1674116870/2c3b745627dcb269f9328ce998fd67ac18698967f4bcdf9e2e0e1387e9aac6f7/0
         """
         p = requests.get(self.URL_CONVERTER.format(videoId))
         df = p.text
         start_dl = df.find(self.URL_DOWNLOADER.format(videoId + self.URL_SEGMENT))  # start position of download link
-        dl_row = df[start_dl:start_dl + 150]
-        dl = re.search(r'[^\"]*', dl_row).group(0)
+        dl_raw = df[start_dl:start_dl + 150]
+        dl = re.search(r'[^\"]*', dl_raw).group(0)
         start_dl = df.find(self.RAW_NAME_TRACK)
         raw_track_name = df[start_dl + self.LEN_RNT:]
         end_track_name = raw_track_name.find('</h2')
         track_name = raw_track_name[:end_track_name]
-        return dl, track_name
+
+        #show file size
+        fs = df[:]
+        for _ in range(8):
+            fs = fs[fs.find("<div class=\"text-shadow-1\">") + 27:]
+        fs = fs[:fs.find("</div>")]
+        return dl, track_name, fs
