@@ -1,4 +1,4 @@
-# labudayBot
+# [@labudayBot](https://t.me/labudayBot)
 Простой бот для Telegram  написан на python (aiogram https://github.com/aiogram/aiogram.git)
 
 # Как запустить
