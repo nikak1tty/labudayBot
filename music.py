@@ -18,19 +18,25 @@ class YoutubeMp3Downloader:
     RAW_NAME_TRACK = "<h2 class=\"text-lg text-blue-600 font-bold m-2 text-center\">"
     LEN_RNT = len(RAW_NAME_TRACK)
 
+
+
     def get_videoId(self, query):
         """
-        Принимает строку. Простой запрос пользователя. Возвращает строку идентификатор видео с ютуба.
-        :param query: string
-        :return: string (Id video from youtube)
+        Возвращает строку идентификатор видео с ютуба.
+        Принимает строку. Простой запрос пользователя.
+        :param query: string запрос пользователя
+        :return: string (Id video from youtube) или None, если это стрим или видео недоступно
         """
         r = requests.get(self.URL_YTB_SEARCH.format(query))
         text = r.text
         start = text.find('videoId')
         row_str = text[start + self.RAW_LEN_STR:start + self.YTB_VIDEO_ID_DISTANCE]
         videoID = re.search(r'^[A-Za-z0-9_-]*', row_str).group(0)
+        if requests.get(self.URL_CONVERTER.format(videoID)).text.find('Invalid YouTube Video ID') > -1:
+            return None
+        else:
+            return videoID
 
-        return videoID
 
     def get_dwnld_link(self, videoId):
         """
